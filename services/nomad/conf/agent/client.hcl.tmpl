@@ -1,0 +1,77 @@
+advertise {
+  http = "{{ "/node-ip" | plugin "ctn" }}:4646"
+  rpc  = "{{ "/node-ip" | plugin "ctn" }}:4647"
+  serf = "{{ "/node-ip" | plugin "ctn" }}:4648"
+}
+
+# docs: https://nomadproject.io/docs/configuration/client/
+client {
+
+  enabled = true
+
+  server_join {
+    retry_join = [
+       {{ range $value := ( (plugin "go_discover" "nomad-server") | split " ") -}}
+          {{ "       " }} "{{ $value }}",
+       {{ end -}}
+    ]
+    retry_interval = "10s"
+  }
+
+  # node_class    = ""   note: could use this instead of node_type below
+
+  {{ if eq ("/node-type" | plugin "ctn") "traefik" }}
+  host_volume "traefik-config-volume" {
+    path = "/etc/traefik"  # path on host
+    read_only = false  # make it writeable for logs
+  }
+
+  # note: these are project-wide, based on estimates from a single Traefik node
+  cpu_total_compute = {{ "/nomad-config/traefik/cpu-total-compute" | plugin "ctp" }}
+  memory_total_mb = {{ "/nomad-config/traefik/memory-total-mb" | plugin "ctp" }}
+  {{ end }}
+
+  host_volume "utility-scripts-volume" {
+    path = "/scripts/utilities"
+    read_only = true
+  }
+
+  meta {
+    node_type = "{{ "/node-type" | plugin "ctn" }}"
+    ctp_prefix = "{{ env "CTP_PREFIX" }}"
+    ctn_prefix = "{{ env "CTN_PREFIX" }}"
+  }
+
+}
+
+
+vault {
+  enabled = true
+  address = "https://{{ "/nomad-config/vault-host" | plugin "ctn" }}:8200"
+  ca_file = "/etc/vault.d/certs/vault_rootCA.pem"
+  cert_file = "/etc/vault.d/certs/certificate.pem"
+  key_file = "/etc/vault.d/certs/key.pem"
+}
+
+
+plugin "docker" {
+  config {
+    allow_caps = [  # first two lines here are the default values
+        "CHOWN", "DAC_OVERRIDE", "FSETID", "FOWNER", "MKNOD", "NET_RAW", "SETGID", "SETUID",
+        "SETFCAP", "SETPCAP", "NET_BIND_SERVICE", "SYS_CHROOT", "KILL", "AUDIT_WRITE",
+        "SYS_PTRACE", "SYS_ADMIN"
+    ]
+    allow_privileged = true
+  }
+}
+# more caps listed here: https://man7.org/linux/man-pages/man7/capabilities.7.html
+
+plugin "raw_exec" {
+  config {
+    enabled = true
+  }
+}
+
+# consider using this to store global config values in consul kv: https://github.com/breser/git2consul
+# and the opposite, write files based on kv store: https://github.com/cimpress-mcp/fsconsul
+# There is also a built-in mechanism for this: https://learn.hashicorp.com/consul/developer-configuration/consul-template

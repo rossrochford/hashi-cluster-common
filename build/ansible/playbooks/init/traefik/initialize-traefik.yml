@@ -1,0 +1,15 @@
+---
+
+- hosts: traefik
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  become: yes
+  become_method: sudo
+  serial: 1
+  any_errors_fatal: true
+  vars:
+    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
+    current_index: "{{ ansible_play_batch.index(inventory_hostname) }}"
+  environment:
+    CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+  tasks:
+    - shell: "/scripts/services/traefik/init/vm_init.sh {{ current_index }}"

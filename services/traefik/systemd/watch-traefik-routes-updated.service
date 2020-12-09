@@ -1,0 +1,30 @@
+[Unit]
+Description="Consul watcher for event: traefik-routes-updated"
+Requires=network-online.target
+After=network-online.target
+StartLimitInterval=180
+StartLimitBurst=18
+
+[Service]
+Type=simple
+User=root
+Group=root
+Environment=SYSTEMD_LOG_LEVEL=debug
+Environment=CONSUL_HTTP_ADDR=none
+Environment=CONSUL_HTTP_TOKEN=none
+Environment=CTN_PREFIX=none
+Environment=CTP_PREFIX=none
+Environment=HOSTING_ENV=none
+Environment=PYTHONPATH=/scripts/utilities
+
+# old: ExecStart=/usr/local/bin/consul watch -type=event -name=traefik-routes-updated /scripts/services/traefik/routes_updated.sh
+
+ExecStart=/usr/local/bin/consul watch -type=keyprefix -prefix=traefik/service-routes/ /scripts/services/traefik/routes_updated.sh
+
+KillMode=process
+Restart=always
+RestartSec=4
+LimitNOFILE=8192
+
+[Install]
+WantedBy=multi-user.target

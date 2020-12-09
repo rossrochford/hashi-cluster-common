@@ -1,0 +1,19 @@
+#!/bin/bash
+
+TAG=$1
+
+if [[ $HOSTING_ENV == "vagrant" ]]; then
+  QUERY=".hosts_by_tag[\"$TAG\"]|join(\" \")"
+  IP_ADDRS=$(cat /etc/node-metadata.json | jq -r "$QUERY" 2> /dev/null)
+
+  echo $IP_ADDRS
+
+  exit 0
+fi
+
+PROJECT_ID=$(metadata_get cluster_service_project_id)
+REGION=$(metadata_get region)
+
+NODE_IP_ADDRESSES=$(/usr/local/bin/discover addrs provider=gce project_name="$PROJECT_ID" zone_pattern="$REGION.*" tag_value="$TAG")
+
+echo $NODE_IP_ADDRESSES
