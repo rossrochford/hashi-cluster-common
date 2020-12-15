@@ -8,10 +8,11 @@ log_level = "DEBUG"
 log_json = true
 enable_syslog = false
 
+
 retry_join = [
-{{ range $value := ( (plugin "go_discover" "consul-server") | split " ") -}}
-  {{ "    " }} "{{ $value }}",
-{{ end -}}
+{% for ip in consul_server_ips %}
+    "{{ ip }}",
+{%- endfor %}
 ]
 retry_interval = "3s"
 
@@ -37,63 +38,72 @@ connect {
   enabled = true
 }
 
+# allows non-leaders to serve service-discovery HTTP requests (up to 3m during leader outage)
+# discovery_max_stale = "3m"
+
+dns_config {
+  use_cache = true
+  cache_max_age = "7s"
+  allow_stale = true
+  max_stale = "3m"  # affects how long DNS functions during leader outage
+  node_ttl = "10s"
+  service_ttl {
+    "*" = "10s"
+  }
+  soa {
+    # based on: https://medium.com/criteo-labs/configure-consul-for-performance-at-scale-f6a089706377
+    expire = 86400
+    # min_ttl reduces performance impact of clients polling for DNS entries when a service is offline. Downside is that when it comes back online, it will take longer for this to propagate.
+    min_ttl = 15
+    refresh = 3600
+    retry = 600
+  }
+}
+
+bind_addr = "{{ node_ip }}"
+node_name = "{{ node_name }}"
+
 ports {
   https = 8501
   grpc = 8502
+  dns = 8600
 }
 
 /*
-# note: jinja2 code is no longer rendered because base.hcl.tmpl
-# was removed from render_config_templates.py
 {% if node_type == "vault" %}
 client_addr = "127.0.0.1"
 {% else %}
 client_addr = "0.0.0.0"
-addresses {
-  http = "0.0.0.0"  # consul_address_ip
-  grpc = "0.0.0.0"
-}
 {% endif %}
 */
 
+{% if node_type == "traefik" %}
+# testing this while debugging envoy sidecar
+client_addr = "{{ node_ip }}"
+{% else %}
 client_addr = "0.0.0.0"
 addresses {
   http = "0.0.0.0"
   https = "0.0.0.0"
   grpc = "0.0.0.0"
 }
+{% endif %}
 
-
-telemetry {
-  statsd_address = "127.0.0.1:8125"
+performance {
+  # choose value carefully, use 5 with low-end instances, otherwise use 1-2 in production
+  raft_multiplier = 3
 }
+
+
+{% if hosting_env == "gcp" %}
+telemetry {
+  # todo: configure premetheus here?
+  statsd_address = "127.0.0.1:8125"
+  disable_compat_1.9 = true
+}
+{% endif %}
 
 enable_central_service_config = true  # must be true for config_entries to be discovered
 
-# https://github.com/hashicorp/consul/blob/master/test/integration/connect/envoy/case-cfg-resolver-defaultsubset/config_entries.hcl
-config_entries {
-  # note: it looks like "consul connect envoy" can be used to generate this config (https://www.consul.io/docs/commands/connect/envoy.html)
-  bootstrap {
-    kind = "proxy-defaults"
-    name = "global"
-    config {
-      # for a list of envoy bootstrap config fields see: https://www.consul.io/docs/connect/proxies/envoy.html#bootstrap-configuration
-      # envoy_dogstatsd_url = "udp://127.0.0.1:9125"
-      envoy_statsd_url = "udp://127.0.0.1:9125"
-      # for monitoring overview see: https://www.hashicorp.com/blog/layer-7-observability-with-consul-service-mesh/  it even has observability for gRPC-based services! (# the docs seem to recommend instead of statsd using Prometheus or Grafana via DogStatsD. I like the look of Grafana!)
-      # You shouldn't need to, but Envoy's stats behavior can be configured as outlined here: https://www.consul.io/docs/connect/proxies/envoy.html#advanced-bootstrap-options
-    }
-  }
-  bootstrap {
-    kind = "service-defaults"  # see list of entry kinds here: https://www.consul.io/docs/agent/config_entries.html
-    name = "count-dash"
-    protocol = "http"   # setting the service's protocol globally seems to be recommended, it also means we don't have to set it in the proxy service definition or upstreams. I think not doing either causes it to fall back to L4 monitoring for the service.
-  }
-  bootstrap {
-    kind = "service-defaults"
-    name = "count-api"
-    protocol = "http"
-  }
-}
 
 # read about Consul auto-pilot for better resilience: https://learn.hashicorp.com/consul/day-2-operations/autopilot

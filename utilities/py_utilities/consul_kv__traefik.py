@@ -19,6 +19,7 @@ REQUIRED_ROUTE_KEYS = [
     'consul_service_name', 'traefik_service_name', 'routing_rule'
 ]
 
+
 def get_traefik_sidecar_upstreams(cli):
     _, sidecar_data = cli.kv.get('traefik/_sidecar-upstreams/', recurse=True)
     existing_sidecars = [json.loads(di['Value'].decode()) for di in sidecar_data or []]
@@ -26,7 +27,7 @@ def get_traefik_sidecar_upstreams(cli):
     return existing_sidecars, sidecars_by_consul_name
 
 
-def get_traefik_dashboards_ip_allowlist():
+def get_traefik_dashboards_ip_allowlist(cli):
 
     _, data = cli.kv.get('traefik/config/dashboards-ip-allowlist')
     if data is None:
@@ -53,13 +54,9 @@ def expand_traefik_service_routes(cli):
             continue
         if route_di['consul_service_name'] not in catalog_service_names:
             continue
-        route_di['route_name'] = di['Key'].lstrip('traefik/service-routes/')
         routes.append(route_di)
-    # routes = [json.loads(di['Value'].decode()) for di in route_data]
-    # routes_by_name = {di['traefik_service_name']: di for di in routes}
 
     existing_sidecars, sidecars_by_consul_name = get_traefik_sidecar_upstreams(cli)
-
     available_sidecar_ports = _get_available_traefik_sidecar_ports(existing_sidecars)
 
     # assign sidecar ports to consul services, ensure assigned ports don't change unnecessarily on refresh

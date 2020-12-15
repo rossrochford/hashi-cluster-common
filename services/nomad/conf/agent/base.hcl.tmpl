@@ -10,10 +10,20 @@ enable_syslog = false
 enable_debug = true
 
 
+bind_addr = "{{ "/node-ip" | plugin "ctn" }}"
+name = "{{ "/node-name" | plugin "ctn" }}"
+
+/*
+advertise {
+  http = "{{ "/node-ip" | plugin "ctn" }}:4646"
+  rpc  = "{{ "/node-ip" | plugin "ctn" }}:4647"
+  serf = "{{ "/node-ip" | plugin "ctn" }}:4648"
+}*/
+
 consul {
   # The address to the Consul agent.
-
-  address = "{{ "/node-ip" | plugin "ctn" }}:8501"  # NB: always point to a local client, never point to a Consul server agent (though this is ok if your local agent is a server)
+  # NB: always point to a local client, never point to a Consul server agent (though this is ok if your local agent is a server)
+  address = "{{ "/node-ip" | plugin "ctn" }}:8501"
 
   # The service name to register the server and client with Consul.
   server_service_name = "nomad-server"
@@ -47,6 +57,7 @@ consul {
 # and also set vault.cert_file and vault.key_file above
 
 
+{{ if eq ("/hosting-env" | plugin "ctp") "gcp" }}
 telemetry {
   statsd_address = "127.0.0.1:8125"
 
@@ -55,3 +66,4 @@ telemetry {
   publish_allocation_metrics = true
   publish_node_metrics = true
 }
+{{ end }}

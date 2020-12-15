@@ -23,8 +23,9 @@ def sys_call(cmd_str, shell=True, print_stdout=False):
             line_err = proc.stderr.readline()
             if line_err:
                 print(line_err.decode())
-
-    return proc.stdout.read().decode(), proc.stderr.read().decode()
+    stdout = proc.stdout.read().decode().strip()
+    stderr = proc.stderr.read().decode().strip()
+    return stdout, stderr
 
 
 def log_error(st):

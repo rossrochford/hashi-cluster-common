@@ -1,10 +1,4 @@
 
-advertise {
-  http = "{{ "/node-ip" | plugin "ctn" }}:4646"
-  rpc  = "{{ "/node-ip" | plugin "ctn" }}:4647"
-  serf = "{{ "/node-ip" | plugin "ctn" }}:4648"
-}
-
 # docs: https://nomadproject.io/docs/configuration/server/
 server {
   enabled          = true

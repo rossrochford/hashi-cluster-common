@@ -9,7 +9,8 @@ else
   sleep 3
 fi
 
-python3 /scripts/utilities/py_utilities/render_config_templates.py "traefik"
+
+python3 /scripts/utilities/py_utilities/render_config_templates.py "traefik" &> /var/log/traefik-python-render.log
 
 # upstreams may have changed so re-register service, is this necessary?
 consul services register /etc/traefik/traefik-consul-service.json

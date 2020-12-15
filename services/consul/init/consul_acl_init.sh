@@ -59,3 +59,5 @@ consul acl role create -name=vault-role -policy-name=vault-policy
 
 
 # todo - continue reading: https://learn.hashicorp.com/consul/security-networking/production-acls
+
+# guide on troubleshooting ACLs: https://learn.hashicorp.com/tutorials/consul/access-control-troubleshoot?in=consul/security-networking

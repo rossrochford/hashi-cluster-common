@@ -18,24 +18,12 @@ job "traefik" {
         auth {
           server_address = "hub.docker.com"
         }
-
-        port_map {
-          http = 80
-          ui = 8080
-          api = 8081
-        }
+        ports = ["http", "ui", "api"]
       }
 
       resources {
         cpu = {{ "/nomad-config/traefik/cpu-total-compute" | plugin "ctp" }}
         memory = {{ "/nomad-config/traefik/memory-total-mb" | plugin "ctp" }}
-
-        network {
-          # note: static ports aren't recommended generally but are appropriate here
-          port "http" { static = 80 }
-          port "ui" { static = 8080 }
-          port "api" { static = 8081 }
-        }
       }
 
       service {
@@ -53,6 +41,13 @@ job "traefik" {
         volume      = "traefik-config"
         destination = "/etc/traefik"
       }
+    }
+
+    network {
+      # note: static ports aren't recommended generally but are appropriate here
+      port "http" { static = 80 }
+      port "ui" { static = 8080 }
+      port "api" { static = 8081 }
     }
 
     volume "traefik-config" {

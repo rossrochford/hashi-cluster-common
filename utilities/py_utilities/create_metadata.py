@@ -5,6 +5,7 @@ import socket
 
 import requests
 
+
 HOSTING_ENV = os.environ['HOSTING_ENV']
 METADATA_BASE_URL = 'http://metadata.google.internal/computeMetadata'
 
@@ -31,11 +32,12 @@ def create_metadata__vagrant():
         'instance_id': os.environ['NODE_NAME'],
         'node_name': os.environ['NODE_NAME'],
         'instance_name': os.environ['NODE_NAME'],
+        'hosting_env': HOSTING_ENV,
         'node_ip': os.environ['NODE_IP'],
         'node_type': os.environ['NODE_TYPE'],
         'external_ip': os.environ['NODE_IP'],
-        'consul_bind_ip': os.environ['NODE_IP'],
-        'consul_address_ip': os.environ['NODE_IP'],
+        #'consul_bind_ip': os.environ['NODE_IP'],
+        #'consul_address_ip': os.environ['NODE_IP'],
         'self_elect_as_consul_leader': False,
         'num_hashi_servers': 3,
         'instance_zone': 'europe-west3-a',  # spoof
@@ -78,9 +80,10 @@ def create_metadata():
     hostname = socket.gethostname()
     metadata['node_name'] = hostname
     metadata['node_ip'] = socket.gethostbyname(hostname)
+    metadata['hosting_env'] = HOSTING_ENV
 
-    metadata['consul_bind_ip'] = metadata['node_ip']
-    metadata['consul_address_ip'] = metadata['node_ip']
+    #metadata['consul_bind_ip'] = metadata['node_ip']
+    #metadata['consul_address_ip'] = metadata['node_ip']
 
     metadata['ctp_prefix'] = os.environ['CTP_PREFIX']
     metadata['ctn_prefix'] = os.environ['CTN_PREFIX']
@@ -124,8 +127,6 @@ def _get_ansible_groups(cluster_hosts):
         group_name = node_type_to_group_name[di['node_type']]
         hosts_by_group[group_name].append(di['ip'])
     return hosts_by_group
-
-
 
 
 def main():

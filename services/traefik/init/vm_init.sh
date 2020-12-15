@@ -24,13 +24,13 @@ consul-template -template "/scripts/services/traefik/conf/dynamic-conf.toml.tmpl
 
 
 if [[ $INSTANCE_INDEX == "0" ]]; then
-
   consul-template -once -template '/scripts/services/traefik/conf/traefik.nomad.tmpl:/etc/traefik/traefik.nomad'
+  sleep 1
   nomad job run /etc/traefik/traefik.nomad
   sleep 4
   consul intention create -allow traefik '*'
-
 fi
 
+chmod -R 0777 /etc/traefik
 /scripts/services/traefik/init/launch_sidecar_proxy.sh
 /scripts/services/traefik/init/launch_config_watcher.sh

@@ -43,6 +43,7 @@ run_playbook consul place-tls-certs.yml
 # start Consul servers, wait server agents to join and discover each other
 # -----------------------------------------------------------------
 
+run_playbook prometheus start-prometheus-container.yml
 run_playbook consul start-server-agents.yml
 
 

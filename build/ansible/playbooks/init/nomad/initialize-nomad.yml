@@ -15,8 +15,8 @@
       when: hosting_env == "gcp"
 
     # not sure if pulling envoy images is necessary anymore...
-    - shell: "docker pull envoyproxy/envoy:v1.11.2@sha256:a7769160c9c1a55bb8d07a3b71ce5d64f72b1f665f10d81aa1581bc3cf850d09"
-    - shell: "docker pull envoyproxy/envoy:v1.14.2"
+    #- shell: "docker pull envoyproxy/envoy:v1.11.2@sha256:a7769160c9c1a55bb8d07a3b71ce5d64f72b1f665f10d81aa1581bc3cf850d09"
+    #- shell: "docker pull envoyproxy/envoy:v1.14.2"
 
 
 - hosts: hashi_servers

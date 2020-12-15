@@ -1,8 +1,8 @@
 [Unit]
-Description="Nomad Agent - client mode"
+Description="Nomad Client Agent"
 Wants=network-online.target
 After=network-online.target
-StartLimitInterval=180
+StartLimitIntervalSec=180
 StartLimitBurst=18
 
 # note: VAULT_TOKEN isn't necessary on nomad clients:
@@ -15,11 +15,11 @@ Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=NOMAD_ADDR=http://{{ "/node-ip" | plugin "ctn" }}:4646
 
 ExecReload=/bin/kill -HUP $MAINPID
-ExecStart=/usr/local/bin/nomad agent -config="/etc/nomad.d/base.hcl" -config="/etc/nomad.d/client.hcl" -node={{ "/node-name" | plugin "ctn" }} -bind={{ "/node-ip" | plugin "ctn" }}
+ExecStart=/usr/local/bin/nomad agent -config="/etc/nomad.d/base.hcl" -config="/etc/nomad.d/client.hcl"
 
 KillMode=process
 KillSignal=SIGINT
-LimitNOFILE=infinity
+LimitNOFILE=16384
 LimitNPROC=infinity
 Restart=always
 RestartSec=3

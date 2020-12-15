@@ -2,7 +2,7 @@
 Description="Traefik Sidecar Proxy"
 Requires=network-online.target
 After=network-online.target
-StartLimitInterval=180
+StartLimitIntervalSec=180
 StartLimitBurst=18
 
 [Service]
@@ -11,11 +11,29 @@ User=consul
 Group=consul
 Environment=SYSTEMD_LOG_LEVEL=debug
 Environment=CONSUL_HTTP_TOKEN=none
-ExecStart=/usr/local/bin/consul connect proxy -sidecar-for traefik -http-addr {{ "/node-ip" | plugin "ctn" }}:8500
+
+Environment=CONSUL_HTTP_ADDR={{ "/node-ip" | plugin "ctn" }}:8501
+Environment=CONSUL_GRPC_ADDR={{ "/node-ip" | plugin "ctn" }}:8502
+
+Environment=CONSUL_HTTP_SSL=true
+Environment=CONSUL_CACERT=/etc/consul.d/tls-certs/consul-agent-ca.pem
+Environment=CONSUL_CLIENT_CERT=/etc/consul.d/tls-certs/dc1-client-consul.pem
+Environment=CONSUL_CLIENT_KEY=/etc/consul.d/tls-certs/dc1-client-consul-key.pem
+
+# ExecStart=/usr/local/bin/consul connect envoy -sidecar-for traefik -http-addr {{ "/node-ip" | plugin "ctn" }}:8501 -grpc-addr {{ "/node-ip" | plugin "ctn" }}:8502 -ca-file=/etc/consul.d/tls-certs/consul-agent-ca.pem -envoy-version=1.16.1
+
+
+# cert arguments seem to be necessary, it's not picking up env variables I think
+# ExecStart=/usr/local/bin/consul connect proxy -sidecar-for traefik -http-addr=https://{{ "/node-ip" | plugin "ctn" }}:8501 -ca-file=/etc/consul.d/tls-certs/consul-agent-ca.pem -client-cert=/etc/consul.d/tls-certs/dc1-client-consul.pem -client-key=/etc/consul.d/tls-certs/dc1-client-consul-key.pem
+
+
+ExecStart=/usr/local/bin/consul connect proxy -sidecar-for traefik -http-addr {{ "/node-ip" | plugin "ctn" }}:8501
+
+
 KillMode=process
 Restart=always
 RestartSec=4
-LimitNOFILE=8192
+LimitNOFILE=16384
 
 [Install]
 WantedBy=multi-user.target

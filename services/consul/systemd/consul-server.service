@@ -2,7 +2,7 @@
 Description="Consul Agent - Server mode"
 Requires=network-online.target
 After=network-online.target
-StartLimitInterval=180
+StartLimitIntervalSec=180
 StartLimitBurst=18
 ConditionDirectoryNotEmpty=/etc/consul.d/
 
@@ -11,14 +11,12 @@ Type=simple
 User=consul
 Group=consul
 Environment=SYSTEMD_LOG_LEVEL=debug
-ExecStart=/usr/local/bin/consul agent -config-file=/etc/consul.d/base.hcl -config-file=/etc/consul.d/server.hcl -node={{ node_name }} -bind={{ node_ip }}
+ExecStart=/usr/local/bin/consul agent -config-file=/etc/consul.d/base.hcl -config-file=/etc/consul.d/server.hcl
 ExecReload=/usr/local/bin/consul reload
 KillMode=process
 Restart=always
 RestartSec=3
-LimitNOFILE=8192
+LimitNOFILE=16384
 
 [Install]
 WantedBy=multi-user.target
-
-# to monitor consul run: consul monitor -log-level debug
