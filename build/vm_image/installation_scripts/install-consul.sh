@@ -3,12 +3,12 @@
 mkdir -p /etc/consul.d
 useradd --system --home /etc/consul.d --shell /bin/false consul
 
-wget https://releases.hashicorp.com/consul/1.9.0/consul_1.9.0_linux_amd64.zip
+wget https://releases.hashicorp.com/consul/1.9.1/consul_1.9.1_linux_amd64.zip
 
-unzip consul_1.9.0_linux_amd64.zip -d .
+unzip consul_1.9.1_linux_amd64.zip -d .
 chown root:root consul
 mv consul /usr/local/bin/consul
-rm consul_1.9.0_linux_amd64.zip
+rm consul_1.9.1_linux_amd64.zip
 
 mkdir -p /opt/consul/logs/
 chown --recursive consul:consul /opt/consul
