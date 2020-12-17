@@ -28,7 +28,7 @@ if [[ $INSTANCE_INDEX == "0" ]]; then
   sleep 1
   nomad job run /etc/traefik/traefik.nomad
   sleep 4
-  consul intention create -allow traefik '*'
+  consul intention create -allow traefik-up '*'
 fi
 
 chmod -R 0777 /etc/traefik

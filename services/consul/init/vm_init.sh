@@ -3,8 +3,9 @@
 
 # todo: move installation lines into packer script
 # todo: include license, attribution and modification notices: https://github.com/hashicorp/terraform-aws-consul/blob/master/LICENSE
-sudo /scripts/services/system-misc/systemd-resolved/setup-systemd-resolved.sh --consul-ip "$NODE_IP"
-sudo systemctl restart systemd-resolved.service
+sudo /scripts/services/system-misc/systemd-resolved/configure_consul_dns_forwarding2.sh
+#sudo /scripts/services/system-misc/systemd-resolved/setup-systemd-resolved.sh --consul-ip "$NODE_IP"
+#sudo systemctl restart systemd-resolved.service
 
 
 # render consul config files

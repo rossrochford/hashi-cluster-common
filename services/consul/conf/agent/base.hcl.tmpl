@@ -61,6 +61,7 @@ dns_config {
 }
 
 bind_addr = "{{ node_ip }}"
+advertise_addr = "{{ node_ip }}"  # redundant because it's the same as bind_addr
 node_name = "{{ node_name }}"
 
 ports {
@@ -77,17 +78,13 @@ client_addr = "0.0.0.0"
 {% endif %}
 */
 
-{% if node_type == "traefik" %}
-# testing this while debugging envoy sidecar
-client_addr = "{{ node_ip }}"
-{% else %}
+
 client_addr = "0.0.0.0"
 addresses {
   http = "0.0.0.0"
   https = "0.0.0.0"
   grpc = "0.0.0.0"
 }
-{% endif %}
 
 performance {
   # choose value carefully, use 5 with low-end instances, otherwise use 1-2 in production

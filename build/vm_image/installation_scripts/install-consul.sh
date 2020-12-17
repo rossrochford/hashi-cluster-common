@@ -16,7 +16,7 @@ chown --recursive consul:consul /opt/consul
 # docker pull envoyproxy/envoy:v1.16.0
 
 # install CNI plugins
-curl -L -o cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.8.7/cni-plugins-linux-amd64-v0.8.7.tgz
+curl -L -o cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.0/cni-plugins-linux-amd64-v0.9.0.tgz
 mkdir -p /opt/cni/bin
 tar -C /opt/cni/bin -xzf cni-plugins.tgz
 
