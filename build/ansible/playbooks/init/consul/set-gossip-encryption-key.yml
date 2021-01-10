@@ -2,10 +2,13 @@
 #  1)
 - hosts: hashi_servers:hashi_clients:traefik:vault_servers
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  serial: 1
   become: yes
   become_method: sudo
   vars:
     gossip_encryption_key: "{{ lookup('env','GOSSIP_ENCRYPTION_KEY') }}"
+  environment:
+    HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     - shell: "/scripts/services/consul/init/set_gossip_encryption_key.sh {{ gossip_encryption_key }}"

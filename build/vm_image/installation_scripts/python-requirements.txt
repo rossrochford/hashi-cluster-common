@@ -4,6 +4,6 @@ pyopenssL==20.0.0
 
 invoke==1.4.1
 Jinja2==2.11.2
-requests==2.25.0
+requests==2.25.1
 pyinotify==0.9.6
 python-consul2==0.1.5

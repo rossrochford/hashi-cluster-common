@@ -1,14 +1,14 @@
 ---
-- hosts: hashi_servers
+
+- hosts: hashi_server_1
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  any_errors_fatal: true
   become: yes
   become_method: sudo
-  vars:
-    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
+    PYTHONPATH: /scripts/utilities
     HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
     #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
     #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
-    - shell: "/scripts/services/consul/init/set_agent_token_server.sh {{ consul_bootstrap_token }}"
+    - shell: "python3 /scripts/utilities/py_utilities/consul_wait_for.py leader-elected 90"

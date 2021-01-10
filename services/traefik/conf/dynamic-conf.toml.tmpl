@@ -2,7 +2,7 @@
 
   [http.middlewares]
 
-    {{ if ne (env "HOSTING_ENV") "vagrant" }}
+    {{ if eq (env "HOSTING_ENV") "gcp" }}
     [http.middlewares.dashboard-auth.basicAuth]
       removeHeader = true
       users = ["{{ "/dashboard-auth" | plugin "ctp" }}"]
@@ -29,7 +29,7 @@
     [http.routers.traefik-dashboard]
       rule = "Host(`traefik.{{ "/domain-name" | plugin "ctp" }}`)"
       middlewares = [
-        "dashboards-ip-allowlist", "source-ratelimit", {{ if ne (env "HOSTING_ENV") "vagrant" }} "dashboard-auth" {{ end }}
+        "dashboards-ip-allowlist", "source-ratelimit", {{ if eq (env "HOSTING_ENV") "gcp" }} "dashboard-auth" {{ end }}
       ]
       entryPoints = ["web"]
       service = "api@internal"
@@ -37,7 +37,7 @@
     [http.routers.consul-ui]
       rule = "Host(`consul.{{ "/domain-name" | plugin "ctp" }}`)"
       middlewares = [
-        "dashboards-ip-allowlist", "source-ratelimit", {{ if ne (env "HOSTING_ENV") "vagrant" }} "dashboard-auth" {{ end }}
+        "dashboards-ip-allowlist", "source-ratelimit", {{ if eq (env "HOSTING_ENV") "gcp" }} "dashboard-auth" {{ end }}
       ]
       entryPoints = ["web"]
       service = "consul-ui"
@@ -45,7 +45,7 @@
     [http.routers.nomad-ui]
       rule = "Host(`nomad.{{ "/domain-name" | plugin "ctp" }}`)"
       middlewares = [
-        "dashboards-ip-allowlist", "source-ratelimit", {{ if ne (env "HOSTING_ENV") "vagrant" }} "dashboard-auth" {{ end }}
+        "dashboards-ip-allowlist", "source-ratelimit", {{ if eq (env "HOSTING_ENV") "gcp" }} "dashboard-auth" {{ end }}
       ]
       entryPoints = ["web"]
       service = "nomad-ui"
@@ -68,6 +68,7 @@
     [http.services.consul-ui]
       [http.services.consul-ui.loadBalancer]
         [[http.services.consul-ui.loadBalancer.servers]]
+          # todo: traefik 2.4 will support tls-encrypted services, when it's released change url to "https://...:8501" and update consul config base.hcl (https://github.com/traefik/traefik/issues/4835)
           url = "http://{{ "hashi-server-1" | plugin "go_discover" }}:8500/"
 
     [http.services.nomad-ui]

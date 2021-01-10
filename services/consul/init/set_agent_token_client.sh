@@ -6,8 +6,13 @@ NODE_TYPE=$(metadata_get "node_type")
 NODE_NAME=$(metadata_get "node_name")
 
 # usually CONSUL_HTTP_ADDR is the local agent but the clients haven't yet been started so we'll connect to a server
-export CONSUL_HTTP_ADDR="$(go_discover hashi-server-1):8500"
+export CONSUL_HTTP_SSL=true
+export CONSUL_CACERT=/etc/consul.d/tls-certs/consul-agent-ca.pem
+export CONSUL_CLIENT_CERT=/etc/consul.d/tls-certs/dc1-client-consul.pem
+export CONSUL_CLIENT_KEY=/etc/consul.d/tls-certs/dc1-client-consul-key.pem
 export CONSUL_HTTP_TOKEN=$BOOTSTRAP_TOKEN
+CONSUL_HTTP_ADDR="$(go_discover hashi-server-1):8501"
+export CONSUL_HTTP_ADDR
 
 
 cd /scripts/services/consul/

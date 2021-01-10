@@ -2,7 +2,7 @@
 
 - hosts: hashi_servers
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  serial: 2
+  serial: 3
   become: yes
   become_method: sudo
   tasks:

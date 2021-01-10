@@ -1,15 +1,16 @@
 ---
-- hosts: hashi_servers:hashi_clients:traefik:vault_servers
+
+- hosts: hashi_server_1
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  serial: 4
-  any_errors_fatal: true
   become: yes
   become_method: sudo
   vars:
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+    CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
     HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
     #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
     #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
-    - shell: "/scripts/services/consul/init/set_agent_token_for_shell.sh {{ consul_bootstrap_token }}"
+    - shell: "/scripts/services/consul/init/configure_anonymous_token.sh"

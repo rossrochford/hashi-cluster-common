@@ -36,7 +36,7 @@ def _get_consul_token_from_env():
 
 
 def _get_instance_name():
-    if HOSTING_ENV == 'vagrant':
+    if HOSTING_ENV in ('vagrant', 'lxd'):
         return socket.gethostname()
 
     resp = requests.get(
@@ -163,7 +163,7 @@ def initialize_project_metadata(cli):
     cli.kv.put(CTP_PREFIX + '/project-id', project_info['cluster_service_project_id'])
     cli.kv.put(CTP_PREFIX + '/hosting-env', HOSTING_ENV)
 
-    if HOSTING_ENV == 'vagrant':
+    if HOSTING_ENV in ('vagrant', 'lxd'):
         cli.kv.put(CTP_PREFIX + '/domain-name', 'localhost')
     else:
         cli.kv.put(CTP_PREFIX + '/domain-name', project_info['domain_name'])

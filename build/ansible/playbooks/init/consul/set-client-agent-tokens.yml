@@ -1,11 +1,15 @@
 ---
 - hosts: hashi_clients:traefik:vault_servers
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  serial: 2
+  serial: 3
   any_errors_fatal: true
   become: yes
   become_method: sudo
   vars:
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
+  environment:
+    HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     - shell: "/scripts/services/consul/init/set_agent_token_client.sh {{ consul_bootstrap_token }}"

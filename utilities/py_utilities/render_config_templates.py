@@ -35,6 +35,9 @@ FILES = {
         ],
         'vagrant': [
             ('/scripts/build_vagrant/ansible/ansible_hosts.tmpl', '/etc/ansible/hosts')
+        ],
+        'lxd': [
+            # ('/scripts/build_lxd/ansible/ansible_hosts.tmpl', '/etc/ansible/hosts')
         ]
     },
     'consul': {

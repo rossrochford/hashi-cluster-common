@@ -4,7 +4,6 @@
 
 - hosts: hashi_clients:vault_servers:traefik
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  serial: 3
   any_errors_fatal: true
   become: yes
   become_method: sudo
@@ -24,11 +23,13 @@
   any_errors_fatal: true
   become: yes
   become_method: sudo
-
+  environment:
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
+    CONSUL_HTTP_ADDR: "127.0.0.1:8500"
   vars:
     hashi_server_index: "{{ groups.hashi_servers.index(inventory_hostname) }}"
     nomad_vault_token: "{{ (lookup('env','NOMAD_VAULT_TOKENS') | from_json)['nomad_vault_tokens'][(hashi_server_index | int)] }}"
-
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
     vault_server_1_ip: "{{ lookup('env','VAULT_IP_ADDR_1') }}"
 
@@ -49,6 +50,10 @@
     current_index: "{{ ansible_play_batch.index(inventory_hostname) }}"
   environment:
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    CONSUL_HTTP_ADDR: "127.0.0.1:8500"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
+
   tasks:
     # estimate available CPU and memory for traefik Nomad clients, based on the first traefik node
     - shell: "/scripts/services/traefik/init/set_nomad_resources.sh"
@@ -68,6 +73,10 @@
     vault_server_1_ip: "{{ lookup('env','VAULT_IP_ADDR_1') }}"
   environment:
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    CONSUL_HTTP_ADDR: "127.0.0.1:8500"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
+
   tasks:
     - shell: "/scripts/services/nomad/init/setup_nomad_client.sh {{ vault_server_1_ip }}"
     - shell: "systemctl enable nomad-client.service; systemctl start nomad-client.service"

@@ -2,14 +2,14 @@
 # NOTE: it would be more idiomatic to use the "template" stanza in the Nomad job to render this file
 
 [log]
-  level = "INFO"
+  level = "DEBUG"
   filePath = "/etc/traefik/traefik.log"
   format = "json"   # or "common"
 
 [accessLog]
   filePath = "/etc/traefik/access.log"
   bufferingSize = 40  # buffer of 40 lines
-  # format = "json"
+  format = "json"
 
 
 # removing for now until port issue is resolved

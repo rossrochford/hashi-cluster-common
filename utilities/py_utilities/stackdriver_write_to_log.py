@@ -17,7 +17,7 @@ LOG_LEVELS = ['debug', 'info', 'warning', 'error', 'critical']
 
 def get_instance_resource():
 
-    if HOSTING_ENV == 'vagrant':
+    if HOSTING_ENV in ('vagrant', 'lxd'):
         return None
 
     def _get_instance_id():

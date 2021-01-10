@@ -1,0 +1,31 @@
+---
+
+- hosts: hashi_server_1
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  become: yes
+  become_method: sudo
+  tasks:
+    - fetch:
+        src: "/tmp/ansible-data/consul-ui-token-rw.json"
+        dest: "/tmp/ansible-data/consul-ui-token-rw.json"
+        flat: yes
+    - fetch:
+        src: "/tmp/ansible-data/consul-ui-token-ro.json"
+        dest: "/tmp/ansible-data/consul-ui-token-ro.json"
+        flat: yes
+    - fetch:
+        src: "/tmp/ansible-data/nomad-vault-tokens.json"
+        dest: "/tmp/ansible-data/nomad-vault-tokens.json"
+        flat: yes
+    - fetch:
+        src: "/tmp/ansible-data/vault-writeonly-token.txt"
+        dest: "/tmp/ansible-data/vault-writeonly-token.txt"
+        flat: yes
+    - fetch:
+        src: "/tmp/ansible-data/vault-root-token.txt"
+        dest: "/tmp/ansible-data/vault-root-token.txt"
+        flat: yes
+    - fetch:
+        src: "/tmp/ansible-data/vault-unseal-key.txt"
+        dest: "/tmp/ansible-data/vault-unseal-key.txt"
+        flat: yes

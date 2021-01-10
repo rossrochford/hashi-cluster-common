@@ -5,10 +5,14 @@ import time
 
 import requests
 
+from py_utilities.util import log_error
+
 
 CONSUL_HTTP_ADDR = os.environ.get(
     'CONSUL_HTTP_ADDR', '127.0.0.1:8500'
 )
+if not CONSUL_HTTP_ADDR.startswith('http'):
+    CONSUL_HTTP_ADDR = 'http://' + CONSUL_HTTP_ADDR
 
 
 def _get_node_name():
@@ -17,31 +21,35 @@ def _get_node_name():
 
 
 def get_peers():
-    url = 'http://' + CONSUL_HTTP_ADDR + '/v1/status/peers'
+    url = CONSUL_HTTP_ADDR + '/v1/status/peers'
     try:
         resp = requests.get(url)
-    except:
+    except Exception as e:
+        log_error(f'{url} gave exception: {e}')
         return None
     if resp.status_code != 200:
+        log_error(f'{url} gave status: {resp.status_code}')
         return None
     num_peers = len(resp.json())
     return num_peers
 
 
 def get_leader():
-    url = 'http://' + CONSUL_HTTP_ADDR + '/v1/status/leader'
+    url = CONSUL_HTTP_ADDR + '/v1/status/leader'
     try:
         resp = requests.get(url)
         if resp.status_code != 200:
+            log_error(f'{url} gave status: {resp.status_code}')
             return None
-    except:
+    except Exception as e:
+        log_error(f'{url} gave exception: {e}')
         return None
     leader = resp.content.decode().strip()
     return leader
 
 
 def get_node_health(node_name):
-    url = 'http://' + CONSUL_HTTP_ADDR + '/v1/health/node/' + node_name
+    url = CONSUL_HTTP_ADDR + '/v1/health/node/' + node_name
     try:
         resp = requests.get(url)
         if resp.status_code != 200:

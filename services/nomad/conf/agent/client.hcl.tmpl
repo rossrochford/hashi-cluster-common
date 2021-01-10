@@ -20,8 +20,6 @@ client {
     path = "/etc/traefik"  # path on host
     read_only = false  # make it writeable for logs
   }
-
-  # note: these are project-wide, based on estimates from a single Traefik node
   cpu_total_compute = {{ "/nomad-config/traefik/cpu-total-compute" | plugin "ctp" }}
   memory_total_mb = {{ "/nomad-config/traefik/memory-total-mb" | plugin "ctp" }}
   {{ end }}
@@ -31,11 +29,23 @@ client {
     read_only = true
   }
 
-  meta {
-    node_type = "{{ "/node-type" | plugin "ctn" }}"
-    ctp_prefix = "{{ env "CTP_PREFIX" }}"
-    ctn_prefix = "{{ env "CTN_PREFIX" }}"
+  {{ if eq ("/hosting-env" | plugin "ctp") "vagrant" }}
+  host_volume "vagrant-shared" {
+    path = "/vagrant_shared"
+    read_only = true
   }
+  {{ end }}
+
+  meta {
+    "node_type" = "{{ "/node-type" | plugin "ctn" }}"
+    "ctp_prefix" = "{{ env "CTP_PREFIX" }}"
+    "ctn_prefix" = "{{ env "CTN_PREFIX" }}"
+    "connect.log_level" = "debug"
+  }
+
+  {{ if eq ("/hosting-env" | plugin "ctp") "vagrant" }}
+  network_interface = "eth1"
+  {{ end }}
 
 }
 
@@ -75,3 +85,6 @@ plugin "raw_exec" {
 # consider using this to store global config values in consul kv: https://github.com/breser/git2consul
 # and the opposite, write files based on kv store: https://github.com/cimpress-mcp/fsconsul
 # There is also a built-in mechanism for this: https://learn.hashicorp.com/consul/developer-configuration/consul-template
+
+
+# interesting, how to allow tasks to access Consul's HTTP API via a mounted unix socket: https://github.com/hashicorp/nomad/issues/8290

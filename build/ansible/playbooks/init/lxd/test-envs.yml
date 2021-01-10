@@ -1,0 +1,40 @@
+---
+
+- hosts: hashi_server_1
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  #roles:
+  #  - weareinteractive.environment
+  become: yes
+  become_method: sudo
+  vars:
+    ctp_prefix: "{{ lookup('env','CTP_PREFIX') }}"
+  #environment:
+  #  CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+  #  CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+  tasks:
+    - name: Get env file content
+      slurp:
+        src: /etc/environment
+      register: env_file_content
+
+    - name: Parse environment
+      set_fact:
+        env_vars: "{{ (env_file_content.content | b64decode) }}"
+
+#    - set_fact:
+#        env_vars: "cat /etc/environment"
+    - debug:
+        msg: "{{ env_vars }}"
+    - shell: "/test_envs.sh"  #"echo $CTN_PREFIX > /tmp/results.txt"
+      environment: "{{ env_vars }}"
+    - debug:
+        msg: "{{ environment }}"
+
+  #- debug:
+      #- debug: var=hostvars[inventory_hostname].key|
+  #    msg: "echo {{ hostvars[inventory_hostname].ctn_prefix }}"
+
+
+
+# for possible solutions see:
+# https://stackoverflow.com/questions/60209185/ansible-environment-variables-from-env-file

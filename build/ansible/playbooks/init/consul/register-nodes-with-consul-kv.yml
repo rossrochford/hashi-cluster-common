@@ -11,7 +11,12 @@
   vars:
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    PYTHONPATH: /scripts/utilities
+    HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     #- shell: "python3 /scripts/utilities/py_utilities/consul_wait_for.py 'node-healthy' 40"
     - name: "creating lock sessions for Consul nodes"
@@ -25,7 +30,12 @@
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
     #project_bucket: "{{ lookup('env','PROJECT_BUCKET') }}"
   environment:
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    PYTHONPATH: /scripts/utilities
+    HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     - name: "initializing project metadata on Consul KV data-store"
       shell: "source /etc/environment; python3 /scripts/utilities/py_utilities/consul_kv.py initialize-project-metadata"
@@ -41,7 +51,12 @@
   vars:
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    PYTHONPATH: /scripts/utilities
+    HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     - name: "registering nodes on Consul KV data-store"
       shell: "source /etc/environment; python3 /scripts/utilities/py_utilities/consul_kv.py register-node"

@@ -60,37 +60,35 @@ dns_config {
   }
 }
 
-bind_addr = "0.0.0.0"  #"{{ node_ip }}"
-advertise_addr = "{{ node_ip }}"
+bind_addr = "0.0.0.0"
+advertise_addr = "{{ node_ip }}"  #  the address advertises to other nodes in the cluster
 node_name = "{{ node_name }}"
 
 ports {
+  http = 8500
   https = 8501
   grpc = 8502
   dns = 8600
 }
 
-/*
+
 {% if node_type == "vault" %}
 client_addr = "127.0.0.1"
+{% elif node_name == 'hashi-server-1' %}
+client_addr = "0.0.0.0"  # temporary until traefik 2.4 is released
 {% else %}
 client_addr = "0.0.0.0"
-{% endif %}
-*/
-
-client_addr = "0.0.0.0"
-/*
 addresses {
-  http = "0.0.0.0"
-  https = "0.0.0.0"
-  grpc = "0.0.0.0"
-}*/
+  http = "127.0.0.1"
+  # https, grpc, dns will default to client_addr
+}
+{% endif %}
+
 
 performance {
   # choose value carefully, use 5 with low-end instances, otherwise use 1-2 in production
   raft_multiplier = 3
 }
-
 
 {% if hosting_env == "gcp" %}
 telemetry {
@@ -100,7 +98,8 @@ telemetry {
 }
 {% endif %}
 
-enable_central_service_config = true  # must be true for config_entries to be discovered
+# must be true for config_entries to be discovered
+enable_central_service_config = true
 
 
 # read about Consul auto-pilot for better resilience: https://learn.hashicorp.com/consul/day-2-operations/autopilot

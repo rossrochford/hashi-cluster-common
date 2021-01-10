@@ -57,7 +57,7 @@ if [[ $HOSTING_ENV == "gcp" ]]; then
   cd /tmp/ansible-data/vault-tls-certs
   zip "/tmp/ansible-data/vault-tls-certs.zip" *.enc
 else
-  # no need for encryption in vagrant env
+  # no need for encryption in vagrant or lxd env
   cd /tmp/ansible-data/vault-tls-certs
   zip "/tmp/ansible-data/vault-tls-certs.zip" *.pem
 fi

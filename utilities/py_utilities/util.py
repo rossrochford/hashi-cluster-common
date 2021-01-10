@@ -35,8 +35,8 @@ def log_error(st):
 
 def get_project_info():
 
-    if HOSTING_ENV == 'vagrant':
-        with open('/scripts/build_vagrant/conf/project-info.json') as f:
+    if HOSTING_ENV in ('vagrant', 'lxd'):
+        with open(f'/scripts/build_{HOSTING_ENV}/conf/project-info.json') as f:
             return json.loads(f.read())
 
     resp = requests.get(

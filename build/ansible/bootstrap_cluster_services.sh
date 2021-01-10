@@ -10,7 +10,7 @@ NOMAD_VAULT_TOKENS_FILEPATH="/tmp/ansible-data/nomad-vault-tokens.json"
 
 run_playbook () {
   # assumed to run from dir: /scripts/build/ansible
-  if [[ $HOSTING_ENV == "vagrant" ]]; then
+  if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
     ansible-playbook --limit "all:!localhost" "playbooks/init/$1/$2"
   else
     ansible-playbook -i ./auth.gcp.yml "playbooks/init/$1/$2" \
@@ -18,8 +18,7 @@ run_playbook () {
   fi
 
   if [[ $? != 0 ]]; then
-    log_write "critical" "playbook $1/$2 failed, exiting bootstrap_cluster.sh"
-    exit 1
+    log_write "critical" "playbook $1/$2 failed, exiting bootstrap_cluster_services.sh"; exit 1
   fi
 }
 
@@ -34,7 +33,7 @@ run_playbook consul set-gossip-encryption-key.yml
 
 # Create and distribute TLS certificates
 # ----------------------------------------
-sudo /scripts/services/consul/init/create_tls_certs.sh
+run_playbook consul create-tls-certs.yml  # sudo /scripts/services/consul/init/create_tls_certs.sh
 
 run_playbook consul place-tls-certs.yml
 
@@ -46,25 +45,20 @@ run_playbook consul place-tls-certs.yml
 run_playbook prometheus start-prometheus-container.yml
 run_playbook consul start-server-agents.yml
 
-
-WAIT_RESULT=$(python3 /scripts/utilities/py_utilities/consul_wait_for.py "leader-elected" 90)
-if [[ "$WAIT_RESULT" != "success" ]]; then
-    echo "warning: waiting for Consul leader election timed out after 90 seconds"
-fi
-
-sleep 14  # sometimes Consul isn't yet ready, wait 14s
+run_playbook consul wait-for-leader-election.yml
+sleep 12  # sometimes Consul isn't yet ready, wait 12s
 
 
 
 # Bootstrap Consul ACL
 # -----------------------------------------------------------------
 
-export CONSUL_HTTP_ADDR="http://$NODE_IP:8500"
+export CONSUL_HTTP_ADDR="http://127.0.0.1:8500"
 
-/scripts/services/consul/init/consul_acl_init.sh
+run_playbook consul acl-init.yml  #/scripts/services/consul/init/consul_acl_init.sh
 
 if [[ $? != 0 ]]; then
-  echo "consul_acl_init.sh failed, exiting"; exit 1
+  echo "consul acl-init.yml failed, exiting"; exit 1
 fi
 
 
@@ -85,7 +79,7 @@ run_playbook consul set-client-agent-tokens.yml
 run_playbook consul start-client-agents.yml; sleep 2
 
 # after ACL bootstrapping is complete, configure the anonymous token policy
-/scripts/services/consul/init/configure_anonymous_token.sh
+run_playbook consul configure-anonymous-token  #/scripts/services/consul/init/configure_anonymous_token.sh
 
 
 

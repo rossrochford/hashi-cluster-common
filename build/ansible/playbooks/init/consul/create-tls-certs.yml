@@ -1,14 +1,12 @@
 ---
-- hosts: hashi_servers
+
+- hosts: hashi_server_1
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
-  any_errors_fatal: true
   become: yes
   become_method: sudo
-  vars:
-    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
     HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
     #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
     #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
-    - shell: "/scripts/services/consul/init/set_agent_token_server.sh {{ consul_bootstrap_token }}"
+    - shell: "/scripts/services/consul/init/create_tls_certs.sh"

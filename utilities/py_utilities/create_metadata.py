@@ -7,6 +7,8 @@ import requests
 
 
 HOSTING_ENV = os.environ['HOSTING_ENV']
+INSTANCE_CONFIG_FILEPATH = os.environ['INSTANCE_CONFIG_FILEPATH']
+PROJECT_INFO_FILEPATH = os.environ['PROJECT_INFO_FILEPATH']
 METADATA_BASE_URL = 'http://metadata.google.internal/computeMetadata'
 
 METADATA_URLS = [
@@ -21,11 +23,11 @@ METADATA_URLS = [
 ]
 
 
-def create_metadata__vagrant():
-    with open('/scripts/build_vagrant/conf/vagrant-cluster.json') as file:
+def create_metadata__vagrant_or_lxd():
+    with open(INSTANCE_CONFIG_FILEPATH) as file:
         cluster_hosts = json.loads(file.read())
 
-    with open('/scripts/build_vagrant/conf/project-info.json') as f:
+    with open(PROJECT_INFO_FILEPATH) as f:
         project_info = json.loads(f.read())
 
     return {
@@ -45,14 +47,15 @@ def create_metadata__vagrant():
         'ctp_prefix': os.environ['CTP_PREFIX'],
         'ctn_prefix': os.environ['CTN_PREFIX'],
         'ansible_groups': _get_ansible_groups(cluster_hosts),
-        'hosts_by_tag': _get_hosts_by_tag(cluster_hosts)
+        'ip_hostnames_by_tag': _get_ip_hostnames_by_tag(cluster_hosts),
+        'ip_addresses_by_tag': _get_ip_addresses_by_tag(cluster_hosts)
     }
 
 
 def create_metadata():
 
-    if HOSTING_ENV == 'vagrant':
-        return create_metadata__vagrant()
+    if HOSTING_ENV in ('vagrant', 'lxd'):
+        return create_metadata__vagrant_or_lxd()
 
     metadata = {}
 
@@ -91,7 +94,16 @@ def create_metadata():
     return metadata
 
 
-def _get_hosts_by_tag(cluster_hosts):
+def _get_ip_hostnames_by_tag(cluster_hosts):
+    # ip_hostname strings
+    hosts_by_tag = defaultdict(list)
+    for di in cluster_hosts:
+        for tag in di['tags']:
+            hosts_by_tag[tag].append(di['ip'] + '_' + di['name'])
+    return hosts_by_tag
+
+
+def _get_ip_addresses_by_tag(cluster_hosts):
     hosts_by_tag = defaultdict(list)
     for di in cluster_hosts:
         for tag in di['tags']:
@@ -121,11 +133,11 @@ def _get_ansible_groups(cluster_hosts):
     hosts_by_group = defaultdict(list)
     for di in cluster_hosts:
         if di['name'] == 'hashi-server-1':
-            hosts_by_group['hashi_server_1'].append(di['ip'])
+            hosts_by_group['hashi_server_1'].append(di)
         if di['name'] == 'vault-server-1':
-            hosts_by_group['vault_server_1'].append(di['ip'])
+            hosts_by_group['vault_server_1'].append(di)
         group_name = node_type_to_group_name[di['node_type']]
-        hosts_by_group[group_name].append(di['ip'])
+        hosts_by_group[group_name].append(di)
     return hosts_by_group
 
 

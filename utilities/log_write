@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $HOSTING_ENV == "vagrant" ]]; then
+if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
   # todo: where to write logs?
   exit 0
 fi

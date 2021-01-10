@@ -2,8 +2,8 @@
 
 KEY=$1
 
-if [[ $HOSTING_ENV == "vagrant" ]]; then
-    /scripts/utilities/metadata_get__vagrant.sh $KEY
+if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
+    /scripts/utilities/metadata_get__lxd_or_vagrant.sh $KEY
     exit 0
 fi
 
@@ -22,6 +22,8 @@ elif [[ $KEY == "project_info" ]]; then
 elif [[ $KEY == "cluster_service_project_id" ]]; then
   CLUSTER_PROJECT_ID=$(echo $PROJECT_INFO | jq -r ".cluster_service_project_id")
   echo $CLUSTER_PROJECT_ID
+elif [[ $KEY == "home_user" ]]; then
+  echo $USER  # todo: should we store and fetch this from PROJECT_INFO?
 elif [[ $KEY == "region" ]]; then
   REGION=$(echo $PROJECT_INFO | jq -r ".region")
   echo $REGION

@@ -1,0 +1,22 @@
+---
+
+- hosts: hashi_servers
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  #roles:
+  #  - weareinteractive.environment
+  become: yes
+  become_method: sudo
+  vars:
+    ctp_prefix: "{{ lookup('env','CTP_PREFIX') }}"
+  #environment:
+  #  CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+  #  CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+  tasks:
+    - shell: "/test_envs.sh"
+
+
+
+# for possible solutions see:
+# https://stackoverflow.com/questions/60209185/ansible-environment-variables-from-env-file
+# ssh workaround:
+# https://gist.github.com/basak/72b87a5b619a100ace1476715bfc5b18

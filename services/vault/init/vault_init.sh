@@ -10,14 +10,17 @@ export VAULT_TOKEN="$ROOT_TOKEN"
 
 UNSEAL_KEY="none"
 
-if [[ $HOSTING_ENV == "vagrant" ]]; then
+if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
   UNSEAL_KEY=$(cat /tmp/ansible-data/vault-init-keys.json | jq -r .unseal_keys_b64[0])
   vault operator unseal $UNSEAL_KEY
+  # when running Vault outside a trusted cloud provider (e.g. AWS, GCP, Azure), you need to unseal vault manually (unless you have enterprise Vault)
+  # These is a project that provides a slightly less secure but free auto-unseal plugin: https://github.com/lrstanley/vault-unseal#why  but be sure only to use this with > 1 vault nodes
+  # Another option is outlined here: https://www.reddit.com/r/devops/comments/66deex/how_are_you_unsealing_hashicorp_vault_in/  (he open sourced this into: https://github.com/jaxxstorm/hookpick)
 fi
 
 vault login "$ROOT_TOKEN"
 
-vault secrets enable -path=secret kv-v2
+vault secrets enable -version=2 secret  # equivalent to: $ vault secrets enable -path=secret kv-v2
 
 if [[ $HOSTING_ENV == "gcp" ]]; then
   vault auth enable gcp

@@ -9,7 +9,7 @@ export CONSUL_BOOTSTRAP_TOKEN=$(cat /tmp/ansible-data/consul-bootstrap-token.jso
 export ANSIBLE_REMOTE_USER=$USER
 
 
-if [[ $HOSTING_ENV == "vagrant" ]]; then
+if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
   ansible-playbook --limit "all:!localhost" "playbooks/remove-initialization-data.yml"
 else
   ansible-playbook -i ./auth.gcp.yml "playbooks/remove-initialization-data.yml" \

@@ -10,22 +10,22 @@ enable_syslog = false
 enable_debug = true
 
 
-bind_addr = "{{ "/node-ip" | plugin "ctn" }}"
+bind_addr = "0.0.0.0"  # "{{ "/node-ip" | plugin "ctn" }}"
 name = "{{ "/node-name" | plugin "ctn" }}"
 
-/*
+
 advertise {
+  # omitting this causes nomad to set the wrong address in consul
   http = "{{ "/node-ip" | plugin "ctn" }}:4646"
   rpc  = "{{ "/node-ip" | plugin "ctn" }}:4647"
   serf = "{{ "/node-ip" | plugin "ctn" }}:4648"
-}*/
+}
 
 consul {
-  # The address to the Consul agent.
-  # NB: always point to a local client, never point to a Consul server agent (though this is ok if your local agent is a server)
+  # NB: always point to the local agent
   address = "{{ "/node-ip" | plugin "ctn" }}:8501"
 
-  # The service name to register the server and client with Consul.
+  # The service names to register the server and client with Consul.
   server_service_name = "nomad-server"
   client_service_name = "nomad-client"
 

@@ -7,9 +7,11 @@
   serial: 1
   any_errors_fatal: true
   vars:
-    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
     current_index: "{{ ansible_play_batch.index(inventory_hostname) }}"
   environment:
-    CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    CONSUL_HTTP_TOKEN: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
     - shell: "/scripts/services/traefik/init/vm_init.sh {{ current_index }}"

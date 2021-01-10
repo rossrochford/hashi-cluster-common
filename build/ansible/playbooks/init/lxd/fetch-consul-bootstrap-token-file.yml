@@ -1,0 +1,16 @@
+---
+
+- hosts: hashi_server_1
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  become: yes
+  become_method: sudo
+  vars:
+    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
+  environment:
+    CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+    CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+  tasks:
+    - fetch:
+        src: "/tmp/ansible-data/consul-bootstrap-token.json"
+        dest: "/tmp/ansible-data/consul-bootstrap-token.json"
+        flat: yes
