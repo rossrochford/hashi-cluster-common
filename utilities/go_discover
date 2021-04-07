@@ -5,7 +5,7 @@ TYPE=${2:-"IP_ADDRESS"}
 
 
 if [[ $HOSTING_ENV == "vagrant" || $HOSTING_ENV == "lxd" ]]; then
-  if [[ $TYPE == "IP_HOSTNAME" ]]; then
+  if [[ $TYPE == "IP|HOSTNAME" ]]; then
     QUERY=".ip_hostnames_by_tag[\"$TAG\"]|join(\" \")"
   else
     QUERY=".ip_addresses_by_tag[\"$TAG\"]|join(\" \")"
@@ -18,7 +18,7 @@ fi
 
 # temporary: hostnames aren't returned by go_discover, we'll use node-metadata.json
 # todo: query for ip & hostnames with 'gcloud compute instances list'
-if [[ $TYPE == "IP_HOSTNAME" ]]; then
+if [[ $TYPE == "IP|HOSTNAME" ]]; then
   QUERY=".ip_hostnames_by_tag[\"$TAG\"]|join(\" \")"
   DATA=$(cat /etc/node-metadata.json | jq -r "$QUERY" 2> /dev/null)
   echo $DATA

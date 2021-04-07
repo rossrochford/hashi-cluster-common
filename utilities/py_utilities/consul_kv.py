@@ -209,10 +209,8 @@ def register_node(cli):
     cli.kv.put(CTN_PREFIX + '/node-ip', node_ip)
 
 
-
 def fire_event(cli, name, body=""):
     cli.event.fire(name, body=body)
-
 
 
 if __name__ == '__main__':
@@ -220,8 +218,7 @@ if __name__ == '__main__':
     action = args[0]
 
     if not CONSUL_HTTP_TOKEN:
-        print('error: missing CONSUL_HTTP_TOKEN')
-        exit(1)
+        print('warning: missing CONSUL_HTTP_TOKEN')
 
     if action == 'create-lock-session':
         # ConsulCli() creates this on initialization if missing

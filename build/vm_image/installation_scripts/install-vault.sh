@@ -11,7 +11,7 @@ mkdir -p /opt/vault/logs/
 sudo chown --recursive vault:vault /opt/vault
 
 
-curl -s -L -o ~/vault.zip https://releases.hashicorp.com/vault/1.6.0/vault_1.6.0_linux_amd64.zip
+curl -s -L -o ~/vault.zip https://releases.hashicorp.com/vault/1.7.0/vault_1.7.0_linux_amd64.zip
 
 sudo unzip ~/vault.zip
 

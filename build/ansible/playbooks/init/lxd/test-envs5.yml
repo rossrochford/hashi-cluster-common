@@ -1,0 +1,13 @@
+---
+
+- hosts: hashi_server_1
+  tasks:
+  - name: Create a container with limited capabilities
+    community.docker.docker_container:
+      image: prom/prometheus:v2.26.0
+      command: sleep infinity
+      auto_remove: yes
+      ports:
+        - 9090:9090
+      volumes:
+        - /scripts/services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml

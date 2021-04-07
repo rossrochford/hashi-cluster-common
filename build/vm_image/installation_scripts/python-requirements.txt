@@ -2,8 +2,9 @@
 cryptography==3.2.1
 pyopenssL==20.0.0
 
-invoke==1.4.1
-Jinja2==2.11.2
+invoke==1.5.0
+Jinja2==2.11.3
 requests==2.25.1
 pyinotify==0.9.6
 python-consul2==0.1.5
+docker==4.4.4

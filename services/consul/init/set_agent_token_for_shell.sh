@@ -30,7 +30,6 @@ fi
 
 
 
-
 consul acl token create -role-name read-only-role -format=json -token=$BOOTSTRAP_TOKEN  > /tmp/ansible-data/read-only-token.json
 RO_AGENT_TOKEN=$(cat /tmp/ansible-data/read-only-token.json | jq -r ".SecretID")
 

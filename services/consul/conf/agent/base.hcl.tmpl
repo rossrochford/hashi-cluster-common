@@ -10,17 +10,17 @@ enable_syslog = false
 
 
 retry_join = [
-{% for ip in consul_server_ips %}
-    "{{ ip }}",
-{%- endfor %}
+{{ range $value := ( (plugin "go_discover" "consul-server") | split " ") -}}
+  {{ "       " }} "{{ $value }}",
+{{ end -}}
 ]
 retry_interval = "3s"
 
 
 acl {
-  enabled = true
-  default_policy = "deny"
-  down_policy = "deny"
+  enabled = {{ "/consul-config/acl-enabled" | plugin "ctp" }}
+  default_policy = "{{ "/consul-config/acl-default-policy" | plugin "ctp" }}"
+  down_policy = "extend-cache"  # or "deny"
   enable_token_persistence = true
   # the comment below gets replaced on client nodes
   #__AGENT_TOKEN_STANZA__
@@ -29,14 +29,19 @@ acl {
 
 encrypt = "__GOSSIP_ENCRYPTION_KEY__"
 
+{{ if eq ("/consul-config/tls-enabled" | plugin "ctp") "true" }}
 verify_server_hostname = true
 verify_incoming = true  # set this false on clients when using auto_tls (we're not)
 verify_outgoing = true
-
+{{ end }}
 
 connect {
   enabled = true
 }
+
+# todo: enable streaming to reduce RPC bandwith:
+# https://www.consul.io/docs/agent/options#use_streaming_backend  (but wait until it is no longer marked as experimental)
+
 
 # allows non-leaders to serve service-discovery HTTP requests (up to 3m during leader outage)
 # discovery_max_stale = "3m"
@@ -60,29 +65,34 @@ dns_config {
   }
 }
 
+
+advertise_addr = "{{ "/node-ip" | plugin "ctn" }}"  # address advertised to other nodes in the cluster
 bind_addr = "0.0.0.0"
-advertise_addr = "{{ node_ip }}"  #  the address advertises to other nodes in the cluster
-node_name = "{{ node_name }}"
+
+
+node_name = "{{ "/node-name" | plugin "ctn" }}"
 
 ports {
   http = 8500
-  https = 8501
   grpc = 8502
   dns = 8600
+
+  {{ if eq ("/consul-config/tls-enabled" | plugin "ctp") "true" }}
+  https = 8501
+  {{ end }}
 }
 
-
-{% if node_type == "vault" %}
+{{ if eq ("/node-type" | plugin "ctn") "vault" }}
 client_addr = "127.0.0.1"
-{% elif node_name == 'hashi-server-1' %}
+{{ else if eq ("/node-name" | plugin "ctn") "hashi-server-1" }}
 client_addr = "0.0.0.0"  # temporary until traefik 2.4 is released
-{% else %}
+{{ else }}
 client_addr = "0.0.0.0"
 addresses {
   http = "127.0.0.1"
   # https, grpc, dns will default to client_addr
 }
-{% endif %}
+{{ end }}
 
 
 performance {
@@ -90,13 +100,13 @@ performance {
   raft_multiplier = 3
 }
 
-{% if hosting_env == "gcp" %}
+{{ if eq ("/hosting-env" | plugin "ctp") "gcp" }}
 telemetry {
-  # todo: configure premetheus here?
+  # todo: configure prometheus here?
   statsd_address = "127.0.0.1:8125"
   disable_compat_1.9 = true
 }
-{% endif %}
+{{ end }}
 
 # must be true for config_entries to be discovered
 enable_central_service_config = true

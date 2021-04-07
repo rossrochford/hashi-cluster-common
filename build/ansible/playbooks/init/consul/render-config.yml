@@ -1,0 +1,23 @@
+---
+
+- hosts: hashi_servers:hashi_clients:traefik:vault_servers
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  serial: 2
+  any_errors_fatal: true
+  become: yes
+  become_method: sudo
+  vars:
+    hashi_playbook_dir: "{{ lookup('env','HASHI_PLAYBOOK_DIRECTORY') }}"
+  environment:
+    CONSUL_HTTP_TOKEN: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
+    #CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
+    #PYTHONPATH: "/scripts/utilities"
+    #HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
+    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
+    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    #NODE_TYPE: "{{ lookup('env','NODE_TYPE') }}"
+
+  tasks:
+    - include_tasks: "{{ hashi_playbook_dir }}/util/load-environment-variables.yml"
+    - name: "re-rendering consul config and sending SIGHUP to consul agents"
+      shell: "/scripts/services/consul/init/consul_config_render.sh true"

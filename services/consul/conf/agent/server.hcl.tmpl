@@ -1,6 +1,5 @@
 
-
-{% if node_name == "hashi-server-1" %}
+{{ if eq ("/node-name" | plugin "ctn") "hashi-server-1" }}
 ui_config {
   enabled = true
   content_path = "/ui"
@@ -12,16 +11,17 @@ ui_config {
   # for Grafana setup example, see:
   # https://www.consul.io/docs/connect/observability/ui-visualization#configuring-dashboard-urls
 }
-{% endif %}
+{{ end }}
 
 server = true
 bootstrap_expect = 3
 
 
+{{ if eq ("/consul-config/tls-enabled" | plugin "ctp") "true" }}
 ca_file = "/etc/consul.d/tls-certs/consul-agent-ca.pem"
 cert_file = "/etc/consul.d/tls-certs/dc1-server-consul.pem"
 key_file = "/etc/consul.d/tls-certs/dc1-server-consul-key.pem"
-
+{{ end }}
 
 
 # https://github.com/hashicorp/consul/blob/master/test/integration/connect/envoy/case-cfg-resolver-defaultsubset/config_entries.hcl
@@ -31,7 +31,10 @@ config_entries {
     kind = "proxy-defaults"
     name = "global"
     config {
-      {% if hosting_env == "gcp" %}envoy_statsd_url = "udp://127.0.0.1:9125"{% endif %}       # for monitoring overview see: https://www.hashicorp.com/blog/layer-7-observability-with-consul-service-mesh/  it even has observability for gRPC-based services! (# the docs seem to recommend instead of statsd using Prometheus or Grafana via DogStatsD. I like the look of Grafana!)
+      {{ if eq ("/hosting-env" | plugin "ctp") "gcp" }}
+      # for monitoring overview see: https://www.hashicorp.com/blog/layer-7-observability-with-consul-service-mesh/  it even has observability for gRPC-based services! (# the docs seem to recommend instead of statsd using Prometheus or Grafana via DogStatsD. I like the look of Grafana!)
+      envoy_statsd_url = "udp://127.0.0.1:9125"
+      {{ end }}
     }
   }
   /*bootstrap {

@@ -14,15 +14,15 @@ Environment=SYSTEMD_LOG_LEVEL=debug
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Environment=NOMAD_ADDR=http://{{ "/node-ip" | plugin "ctn" }}:4646
 
-ExecReload=/bin/kill -HUP $MAINPID
 ExecStart=/usr/local/bin/nomad agent -config="/etc/nomad.d/base.hcl" -config="/etc/nomad.d/client.hcl"
+ExecReload=/bin/kill -SIGHUP $MAINPID
 
 KillMode=process
 KillSignal=SIGINT
 LimitNOFILE=16384
 LimitNPROC=infinity
 Restart=always
-RestartSec=3
+RestartSec=4
 TasksMax=infinity
 
 [Install]

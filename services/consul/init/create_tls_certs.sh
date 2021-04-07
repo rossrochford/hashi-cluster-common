@@ -9,14 +9,14 @@ cd /tmp/ansible-data/tls-certs-new
 consul tls ca create
 
 
-SERVER_IP_ADDRESSES=$(go_discover consul-server "IP_HOSTNAME")
+SERVER_IP_ADDRESSES=$(go_discover consul-server "IP|HOSTNAME")
 
 
 # create a certificate for each server
 for IP_HOSTNAME in $SERVER_IP_ADDRESSES
 do
-  IP=$(echo $IP_HOSTNAME | cut -d"_" -f1)
-  HOSTNAME=$(echo $IP_HOSTNAME | cut -d"_" -f2)
+  IP=$(echo $IP_HOSTNAME | cut -d"|" -f1)
+  HOSTNAME=$(echo $IP_HOSTNAME | cut -d"|" -f2)
   consul tls cert create -server -additional-ipaddress=$IP
   mv dc1-server-consul-0-key.pem "dc1-server-consul-$HOSTNAME-key.pem"
   mv dc1-server-consul-0.pem "dc1-server-consul-$HOSTNAME.pem"

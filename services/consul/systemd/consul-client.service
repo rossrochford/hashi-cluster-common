@@ -12,10 +12,11 @@ User=consul
 Group=consul
 Environment=SYSTEMD_LOG_LEVEL=debug
 ExecStart=/usr/local/bin/consul agent -config-file=/etc/consul.d/base.hcl -config-file=/etc/consul.d/client.hcl
-ExecReload=/usr/local/bin/consul reload
+ExecReload=/bin/kill -SIGHUP $MAINPID
+# ExecReload=/usr/local/bin/consul reload
 KillMode=process
 Restart=always
-RestartSec=3
+RestartSec=4
 LimitNOFILE=16384
 
 [Install]

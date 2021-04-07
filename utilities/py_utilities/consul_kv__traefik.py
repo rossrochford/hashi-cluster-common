@@ -29,11 +29,12 @@ def get_traefik_sidecar_upstreams(cli):
 
 def get_traefik_dashboards_ip_allowlist(cli):
 
-    _, data = cli.kv.get('traefik/config/dashboards-ip-allowlist')
+    _, data = cli.kv.get('traefik/config/dashboards-ip-allowlist/', recurse=True)
     if data is None:
         return ['0.0.0.0/0']
 
-    return json.loads(data['Value'].decode())
+    cidr_strings = [di['Value'].decode() for di in data]
+    return cidr_strings
 
 
 def expand_traefik_service_routes(cli):

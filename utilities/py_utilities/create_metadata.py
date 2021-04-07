@@ -99,7 +99,7 @@ def _get_ip_hostnames_by_tag(cluster_hosts):
     hosts_by_tag = defaultdict(list)
     for di in cluster_hosts:
         for tag in di['tags']:
-            hosts_by_tag[tag].append(di['ip'] + '_' + di['name'])
+            hosts_by_tag[tag].append(di['ip'] + '|' + di['name'])
     return hosts_by_tag
 
 

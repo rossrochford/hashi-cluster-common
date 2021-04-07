@@ -1,0 +1,15 @@
+---
+
+- name: "Convert /etc/environment to json"
+  shell: "python3 /scripts/utilities/py_utilities/render_config_templates.py env-vars-json"
+  environment:
+    PYTHONPATH: /scripts/utilities
+
+- name: "Get env file content"
+  slurp:
+    src: /tmp/ansible-data/environment.json
+  register: env_json_file_content
+
+- name: "Parse environment"
+  set_fact:
+    env_vars: "{{ (env_json_file_content.content | b64decode) | from_json }}"

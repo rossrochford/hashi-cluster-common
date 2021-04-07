@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MAIN_TRAEFIK_HOSTNAME=$(consul kv get traefik/config/main-node-hostname)
+MAIN_TRAEFIK_HOSTNAME=$(consul kv get "$CTP_PREFIX/traefik-config/main-node-hostname")
 THIS_HOSTNAME=$(hostname)
 
 if [[ "$THIS_HOSTNAME" == "$MAIN_TRAEFIK_HOSTNAME" ]]; then

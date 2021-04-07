@@ -1,0 +1,10 @@
+---
+
+- hosts: hashi_server_1
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  any_errors_fatal: true
+  vars:
+    hashi_playbook_dir: "{{ lookup('env','HASHI_PLAYBOOK_DIRECTORY') }}"
+  tasks:
+    - debug:
+        msg: "playbook_dir before loading env vars: {{ hashi_playbook_dir }}"

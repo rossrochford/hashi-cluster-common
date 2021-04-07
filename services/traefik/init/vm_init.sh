@@ -10,8 +10,8 @@ chmod -R 0777 /etc/traefik
 
 if [[ $INSTANCE_INDEX == "0" ]]; then
 
-  consul kv put traefik/config/main-node-hostname $(hostname)
-  consul kv put traefik/config/dashboards-ip-allowlist '["0.0.0.0/0"]'
+  consul kv put "traefik/config/main-node-hostname" $(hostname)
+  consul kv put "traefik/config/dashboards-ip-allowlist/0" "0.0.0.0/0"
 
   # create /etc/traefik/traefik-consul-service.json and register service, note: it will have no upstreams yet
   python3 /scripts/utilities/py_utilities/render_config_templates.py "traefik"

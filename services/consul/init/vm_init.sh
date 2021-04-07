@@ -9,8 +9,10 @@ sudo /scripts/services/system-misc/systemd-resolved/configure_consul_dns_forward
 
 
 # render consul config files
-python3 /scripts/utilities/py_utilities/render_config_templates.py "consul"
+sudo /scripts/services/consul/init/consul_config_init.sh
 
+
+# --------------------------
 
 chown --recursive consul:consul /etc/consul.d
 chmod 640 /etc/consul.d/*.hcl

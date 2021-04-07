@@ -1,5 +1,5 @@
 ---
-#  1)
+
 - hosts: hashi_servers:hashi_clients:traefik:vault_servers
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
   become: yes

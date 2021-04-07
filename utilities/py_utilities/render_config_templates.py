@@ -13,20 +13,12 @@ HOSTING_ENV = os.environ['HOSTING_ENV']
 NODE_TYPE = os.environ['NODE_TYPE']
 
 
-CONSUL_FILES_BASE = [
-    ('/scripts/services/consul/conf/agent/base.hcl.tmpl', '/etc/consul.d/base.hcl'),
-    '/scripts/services/consul/acl/policies/consul_agent_policy.hcl',
-    '/scripts/services/consul/acl/policies/shell_policies/hashi_server_1_shell_policy.hcl',
-    '/scripts/services/consul/acl/policies/shell_policies/read_only_policy.hcl',
-    '/scripts/services/consul/acl/policies/shell_policies/traefik_shell_policy.hcl'
+CONSUL_POLICY_FILES = [
+    ('/scripts/services/consul/acl/policies/consul_agent_policy.hcl.tmpl', '/scripts/services/consul/acl/policies/consul_agent_policy.hcl'),
+    ('/scripts/services/consul/acl/policies/shell_policies/hashi_server_1_shell_policy.hcl.tmpl', '/scripts/services/consul/acl/policies/shell_policies/hashi_server_1_shell_policy.hcl'),
+    ('/scripts/services/consul/acl/policies/shell_policies/read_only_policy.hcl.tmpl', '/scripts/services/consul/acl/policies/shell_policies/read_only_policy.hcl'),
+    ('/scripts/services/consul/acl/policies/shell_policies/traefik_shell_policy.hcl.tmpl', '/scripts/services/consul/acl/policies/shell_policies/traefik_shell_policy.hcl'),
 ]
-CONSUL_SERVER_FILES = CONSUL_FILES_BASE + [
-    ('/scripts/services/consul/conf/agent/server.hcl.tmpl', '/etc/consul.d/server.hcl'),
-]
-CONSUL_CLIENT_FILES = CONSUL_FILES_BASE + [
-    ('/scripts/services/consul/conf/agent/client.hcl.tmpl', '/etc/consul.d/client.hcl'),
-]
-
 
 FILES = {
     'ansible': {
@@ -40,13 +32,7 @@ FILES = {
             # ('/scripts/build_lxd/ansible/ansible_hosts.tmpl', '/etc/ansible/hosts')
         ]
     },
-    'consul': {
-        'hashi_server': CONSUL_SERVER_FILES,
-        'hashi_client': CONSUL_CLIENT_FILES,
-        'vault': CONSUL_CLIENT_FILES,
-        'traefik': CONSUL_CLIENT_FILES
-    },
-
+    'consul': CONSUL_POLICY_FILES,
     'traefik': [
         ('/scripts/services/traefik/conf/traefik-consul-service.json.tmpl', '/etc/traefik/traefik-consul-service.json'),
 
@@ -67,10 +53,12 @@ def do_template_render(template_fp, json_data):
 
 def render_templates(service, extra_args):
 
+    if service == 'env-vars-json':
+        create_environment_variable_json_file()
+        return
+
     if service == 'ansible':
         files = FILES['ansible'][HOSTING_ENV]
-    elif service == 'consul':
-        files = FILES['consul'][NODE_TYPE]
     else:
         files = FILES[service]
 
@@ -83,7 +71,7 @@ def render_templates(service, extra_args):
         with open('/etc/node-metadata.json') as f:
             data = json.loads(f.read())
 
-    if service == 'ansible':
+    if service == 'ansible' and extra_args:  # todo: revisit this
         # comma-separated list of instance names
         data['new_hashi_clients'] = extra_args[0].split(',') if extra_args else []
 
@@ -102,12 +90,25 @@ def render_templates(service, extra_args):
             file.write(rendered_tmpl)
 
 
+def create_environment_variable_json_file():
+    if os.path.exists('/tmp/ansible-data/environment.json'):
+        # to force regeneration, delete this file beforehand
+        return
+    if not os.path.exists('/etc/environment'):
+        return
+    with open('/etc/environment') as file:
+        lines = [s.strip() for s in file.readlines()]
+        env_variables = dict([tuple(s.split('=')) for s in lines])
+        env_variables = {k: v.strip().strip('"') for (k, v) in env_variables.items()}
+
+    with open('/tmp/ansible-data/environment.json', 'w') as file:
+        file.write(
+            json.dumps(env_variables)
+        )
+
+
 if __name__ == '__main__':
     service_slug = sys.argv[1]
     extra_args = sys.argv[2:]
-
-    if service_slug not in ('ansible', 'consul'):
-        if service_slug not in FILES:
-            exit('unexpected service name: "%s"' % service_slug)
 
     render_templates(service_slug, extra_args)

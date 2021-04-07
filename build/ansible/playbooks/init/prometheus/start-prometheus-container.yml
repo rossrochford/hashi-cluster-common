@@ -5,8 +5,11 @@
   become: yes
   become_method: sudo
   tasks:
+    - name: "pulling prometheus docker image"
+      docker_image:
+        name: "prom/prometheus:v2.26.0"
     - name: "starting prometheus container"
-      shell: "docker run -d --rm  -p 9090:9090 -v /scripts/services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus:v2.23.0"
+      shell: "docker run -d --rm  -p 9090:9090 -v /scripts/services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus:v2.26.0"
       retries: 2  # sometimes image fails to pull (probably just wifi issues on dev setup)
       delay: 7
       ignore_errors: yes

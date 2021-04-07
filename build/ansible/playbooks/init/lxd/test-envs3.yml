@@ -1,0 +1,12 @@
+---
+
+- hosts: hashi_server_1
+  remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
+  become: yes
+  become_method: sudo
+  vars:
+    local_playbooks_dir: "{{ lookup('env','HASHI_COMMON_REPO_DIRECTORY') }}/build/ansible/playbooks"
+  tasks:
+    - include_tasks: "{{ local_playbooks_dir }}/util/load-environment-variables.yml"
+    - shell: "echo $CTN_PREFIX > /tmp/result.txt"
+      environment: "{{ env_vars }}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.0.2
+VERSION=2.0.4
 OS=linux
 ARCH=amd64
 

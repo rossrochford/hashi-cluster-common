@@ -27,38 +27,38 @@
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
   any_errors_fatal: true
   vars:
-    consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
-    #project_bucket: "{{ lookup('env','PROJECT_BUCKET') }}"
+    hashi_playbook_dir: "{{ lookup('env','HASHI_PLAYBOOK_DIRECTORY') }}"
   environment:
     CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
-    CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
+    CONSUL_HTTP_TOKEN: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
     PYTHONPATH: /scripts/utilities
     HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
-    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
-    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
+    - debug:
+        msg: "playbook_dir before loading env vars: {{ hashi_playbook_dir }}"
+    - include_tasks: "{{ hashi_playbook_dir }}/util/load-environment-variables.yml"
     - name: "initializing project metadata on Consul KV data-store"
-      shell: "source /etc/environment; python3 /scripts/utilities/py_utilities/consul_kv.py initialize-project-metadata"
-      args:
-        executable: /bin/bash
+      shell: "python3 /scripts/utilities/py_utilities/consul_kv.py initialize-project-metadata"
     #  shell: "python3 /scripts/utilities/py_utilities/gcloud_storage.py create-bucket {{ project_bucket }}"
-
+    - shell: 'consul kv put "$CTP_PREFIX/consul-config/acl-enabled" "false"'
+    - shell: 'consul kv put "$CTP_PREFIX/consul-config/acl-default-policy" "allow"'
+    - shell: 'consul kv put "$CTP_PREFIX/consul-config/tls-enabled" "false"'
 
 - hosts: hashi_servers:hashi_clients:traefik:vault_servers
   remote_user: "{{ lookup('env','ANSIBLE_REMOTE_USER') }}"
   serial: 2
   any_errors_fatal: true
   vars:
+    hashi_playbook_dir: "{{ lookup('env','HASHI_PLAYBOOK_DIRECTORY') }}"
     consul_bootstrap_token: "{{ lookup('env','CONSUL_BOOTSTRAP_TOKEN') }}"
   environment:
     CONSUL_HTTP_ADDR: "http://127.0.0.1:8500"
     CONSUL_HTTP_TOKEN: "{{ consul_bootstrap_token }}"
     PYTHONPATH: /scripts/utilities
     HOSTING_ENV: "{{ lookup('env','HOSTING_ENV') }}"
-    #CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
-    #CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
+    # CTN_PREFIX: "{{ lookup('env','CTN_PREFIX') }}"
+    # CTP_PREFIX: "{{ lookup('env','CTP_PREFIX') }}"
   tasks:
+    - include_tasks: "{{ hashi_playbook_dir }}/util/load-environment-variables.yml"
     - name: "registering nodes on Consul KV data-store"
-      shell: "source /etc/environment; python3 /scripts/utilities/py_utilities/consul_kv.py register-node"
-      args:
-        executable: /bin/bash
+      shell: "python3 /scripts/utilities/py_utilities/consul_kv.py register-node"

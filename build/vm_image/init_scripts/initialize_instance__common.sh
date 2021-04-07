@@ -44,17 +44,19 @@ else
   # these need to be set for the Consul and Nomad CLIs to work in ssh sessions
   echo "CONSUL_HTTP_ADDR=127.0.0.1:8500" >> /etc/environment
   #echo "CONSUL_HTTP_ADDR=\"$NODE_IP:8500\"" >> /etc/environment
-  echo "NOMAD_ADDR=\"http://$NODE_IP:4646\"" >> /etc/environment
+  echo "NOMAD_ADDR=\"http://$NODE_IP:4646\"" >> /etc/environment  # todo: I think this can now be set to 127.0.0.1
 fi
+
+pip3 install docker==4.4.4 # todo: temp, this was moved to packer build
 
 
 if [[ "$NODE_NAME" == "traefik-1" ]]; then
-  # install envoy (todo: move to packer) (todo: also pull prometheus image in packer)
-  HOME_USER=$(metadata_get home_user)
-  curl -L https://getenvoy.io/cli | sudo bash -s -- -b /usr/local/bin
-  sudo -u $HOME_USER getenvoy fetch standard:1.16.1
-  sudo cp "/home/$HOME_USER/.getenvoy/builds/standard/1.16.1/linux_glibc/bin/envoy" /usr/bin/envoy
+  # skipped if binary already exists
+  build/vm_image/installation_scripts/install-envoy.sh 1.16.2
 fi
 
+if [[ "$NODE_NAME" == "hashi-server-1" ]]; then
+  docker pull prom/prometheus:v2.26.0
+fi
 
 touch /scripts/common-end-reached.txt
